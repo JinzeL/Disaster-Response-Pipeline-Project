@@ -1,16 +1,64 @@
+# import libraries
 import sys
-
+import pandas as pd
+from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
-    pass
-
+    """ 
+    Load two raw data files.
+  
+    Parameters: 
+    messages_filepath (str): path of messages data file
+    categories_filepath (str): path of categories data file
+    
+    Returns: 
+    DataFrame: a DataFrame combined two data files
+  
+    """
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+    df = pd.merge(messages,categories, on = 'id')
+    return df
 
 def clean_data(df):
-    pass
-
+    """ 
+    Clean the dataframe.
+  
+    Parameters: 
+    df (DataFrame): the combined DataFrame of categories and messages
+    
+    Returns: 
+    DataFrame: a DataFrame with messages and cleaned categories
+  
+    """    
+    categories = df.categories.str.split(';',expand=True)
+    row = categories.iloc[0,:]
+    category_colnames = row.apply(lambda x: x.split('-')[0])
+    categories.columns = category_colnames
+    for column in categories:
+    # set each value to be the last character of the string
+    categories[column] = categories[column].str[-1:]
+    # convert column from string to numeric
+    categories[column] = categories[column].astype(int)
+    df.drop('categories',axis=1,inplace=True)
+    # drop duplicates
+    df = df.loc[~df.duplicated(),:]
+    return df
 
 def save_data(df, database_filename):
-    pass  
+    """ 
+    Save cleaned data into a sqlite database ('data_table' table).
+  
+    Parameters: 
+    df (DataFrame): the cleaned DataFrame of categories and messages
+    database_filename (str): path of the sqlite database saved
+    
+    Returns: 
+    None
+  
+    """
+    engine = create_engine('sqlite:///' + database_filename)
+    df.to_sql('data_table', engine, index=False)
 
 
 def main():
