@@ -14,7 +14,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics import classification_report
-from sklearn.externals import joblib 
+import sklearn.externals 
+import joblib 
 from nltk.corpus import stopwords
 import string
 
@@ -35,7 +36,7 @@ def load_data(database_filepath):
     X = df['message']
     Y = df.iloc[:,4:]
     Y.related.replace(2,1,inplace=True)
-    cols = Y.columns
+    cols = list(Y.columns)
     return X, Y, cols
 
 def tokenize(text):
@@ -106,9 +107,9 @@ def evaluate_model(model, X_test, Y_test, category_names):
     None
     """
     y_pred = model.predict(X_test)
-    for i in range(len(category_names):
-                   print('Classification Report for ' + category_names[i])
-                   print(classification_report(np.array(y_test)[:,i],y_pred_new[:,i]))
+    for i in range(len(category_names)):
+        print('Classification Report for ' + category_names[i])
+        print(classification_report(np.array(Y_test)[:,i],y_pred[:,i]))
 
 def save_model(model, model_filepath):
     """ 

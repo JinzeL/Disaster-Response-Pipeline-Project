@@ -36,11 +36,13 @@ def clean_data(df):
     category_colnames = row.apply(lambda x: x.split('-')[0])
     categories.columns = category_colnames
     for column in categories:
-    # set each value to be the last character of the string
-    categories[column] = categories[column].str[-1:]
-    # convert column from string to numeric
-    categories[column] = categories[column].astype(int)
+        # set each value to be the last character of the string
+        categories[column] = categories[column].str[-1:]
+        # convert column from string to numeric
+        categories[column] = categories[column].astype(int)
     df.drop('categories',axis=1,inplace=True)
+    # concatenate the original dataframe with the new `categories` dataframe
+    df = pd.concat([df,categories], axis=1)
     # drop duplicates
     df = df.loc[~df.duplicated(),:]
     return df
@@ -58,7 +60,7 @@ def save_data(df, database_filename):
   
     """
     engine = create_engine('sqlite:///' + database_filename)
-    df.to_sql('data_table', engine, index=False)
+    df.to_sql('data_table', engine, index=False, if_exists='replace')
 
 
 def main():

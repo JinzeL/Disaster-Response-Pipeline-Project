@@ -8,7 +8,8 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+import sklearn.externals 
+import joblib
 from sqlalchemy import create_engine
 
 
@@ -26,11 +27,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('data_table', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -43,9 +44,31 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    message_length = df.message.apply(len)
+    message_length = message_length[message_length <= 500]
+    message_length = message_length.value_counts().sort_index()
+    message_length_index = list(message_length.index)
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
+        {
+            'data': [
+                Bar(
+                    x=message_length_index,
+                    y=message_length
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Length',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Message Length"
+                }
+            }
+        },
         {
             'data': [
                 Bar(
